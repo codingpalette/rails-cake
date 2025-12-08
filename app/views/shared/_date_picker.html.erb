@@ -1,0 +1,246 @@
+<%
+  # Parameters:
+  # - form: the form object
+  # - field: the field name (symbol)
+  # - label: the label text
+  # - value: the initial value (Date object or string)
+  # - max_date: maximum selectable date (optional, defaults to today)
+  # - min_date: minimum selectable date (optional)
+  # - required: whether the field is required (optional, defaults to true)
+
+  field_id = "date-picker-#{field}-#{SecureRandom.hex(4)}"
+  initial_value = value.is_a?(Date) ? value : (value.present? ? Date.parse(value) : Date.today)
+  formatted_value = initial_value.strftime("%Y-%m-%d")
+  max_date ||= Date.today
+  min_date ||= Date.today - 10.years
+%>
+
+<div class="date-picker-container">
+  <%= form.label field, label, class: "block text-sm font-medium text-gray-700 mb-2" %>
+  <div class="relative">
+    <%= form.hidden_field field, value: formatted_value, id: "#{field_id}-hidden" %>
+    <div class="relative">
+      <input type="text"
+             id="<%= field_id %>"
+             value="<%= initial_value.strftime('%Y년 %m월 %d일') %>"
+             readonly
+             class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition duration-200"
+             data-date-value="<%= formatted_value %>"
+             data-max-date="<%= max_date.strftime('%Y-%m-%d') %>"
+             data-min-date="<%= min_date.strftime('%Y-%m-%d') %>"
+             <%= required ? 'required' : '' %>>
+      <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 달력 드롭다운 -->
+    <div id="<%= field_id %>-calendar" class="hidden absolute z-50 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 p-4" style="min-width: 320px;">
+      <!-- 년월 선택 헤더 -->
+      <div class="flex items-center justify-between mb-4">
+        <button type="button" class="calendar-prev p-1 hover:bg-gray-100 rounded-lg transition">
+          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <div class="flex items-center space-x-2">
+          <select class="calendar-year text-lg font-semibold text-gray-900 border-0 focus:ring-0 cursor-pointer">
+            <% (min_date.year..max_date.year).each do |year| %>
+              <option value="<%= year %>" <%= 'selected' if year == initial_value.year %>><%= year %>년</option>
+            <% end %>
+          </select>
+          <select class="calendar-month text-lg font-semibold text-gray-900 border-0 focus:ring-0 cursor-pointer">
+            <% 1.upto(12) do |month| %>
+              <option value="<%= month %>" <%= 'selected' if month == initial_value.month %>><%= month %>월</option>
+            <% end %>
+          </select>
+        </div>
+        <button type="button" class="calendar-next p-1 hover:bg-gray-100 rounded-lg transition">
+          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 요일 헤더 -->
+      <div class="grid grid-cols-7 gap-1 mb-2">
+        <% %w[일 월 화 수 목 금 토].each_with_index do |day, index| %>
+          <div class="text-center text-xs font-medium <%= index == 0 ? 'text-red-500' : (index == 6 ? 'text-blue-500' : 'text-gray-700') %> py-1">
+            <%= day %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- 날짜 그리드 -->
+      <div class="calendar-days grid grid-cols-7 gap-1">
+        <!-- JavaScript로 동적 생성 -->
+      </div>
+
+      <!-- 오늘 버튼 -->
+      <div class="mt-3 pt-3 border-t border-gray-200 flex justify-between">
+        <button type="button" class="calendar-today text-sm text-amber-600 hover:text-amber-700 font-medium">
+          오늘 선택
+        </button>
+        <button type="button" class="calendar-close text-sm text-gray-600 hover:text-gray-700">
+          닫기
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const fieldId = '<%= field_id %>';
+  const input = document.getElementById(fieldId);
+  const hiddenInput = document.getElementById(fieldId + '-hidden');
+  const calendar = document.getElementById(fieldId + '-calendar');
+  const yearSelect = calendar.querySelector('.calendar-year');
+  const monthSelect = calendar.querySelector('.calendar-month');
+  const daysContainer = calendar.querySelector('.calendar-days');
+  const prevBtn = calendar.querySelector('.calendar-prev');
+  const nextBtn = calendar.querySelector('.calendar-next');
+  const todayBtn = calendar.querySelector('.calendar-today');
+  const closeBtn = calendar.querySelector('.calendar-close');
+
+  const maxDate = new Date(input.dataset.maxDate);
+  const minDate = new Date(input.dataset.minDate);
+  let selectedDate = new Date(input.dataset.dateValue);
+
+  function renderCalendar() {
+    const year = parseInt(yearSelect.value);
+    const month = parseInt(monthSelect.value) - 1;
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+    daysContainer.innerHTML = '';
+
+    for (let i = 0; i < 42; i++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
+
+      const dayDiv = document.createElement('button');
+      dayDiv.type = 'button';
+      dayDiv.className = 'p-2 text-sm rounded-lg hover:bg-amber-50 transition ';
+
+      if (date.getMonth() !== month) {
+        dayDiv.className += 'text-gray-300 ';
+      } else {
+        const dayOfWeek = date.getDay();
+        if (dayOfWeek === 0) {
+          dayDiv.className += 'text-red-500 ';
+        } else if (dayOfWeek === 6) {
+          dayDiv.className += 'text-blue-500 ';
+        } else {
+          dayDiv.className += 'text-gray-900 ';
+        }
+      }
+
+      if (date > maxDate || date < minDate) {
+        dayDiv.className += 'opacity-30 cursor-not-allowed ';
+        dayDiv.disabled = true;
+      }
+
+      if (date.toDateString() === selectedDate.toDateString()) {
+        dayDiv.className += 'bg-amber-500 text-white hover:bg-amber-600 ';
+      }
+
+      if (date.toDateString() === new Date().toDateString() && date.getMonth() === month) {
+        dayDiv.className += 'font-bold ring-2 ring-amber-400 ';
+      }
+
+      dayDiv.textContent = date.getDate();
+      dayDiv.dataset.date = date.toISOString().split('T')[0];
+
+      if (!dayDiv.disabled) {
+        dayDiv.addEventListener('click', function() {
+          selectDate(new Date(this.dataset.date));
+        });
+      }
+
+      daysContainer.appendChild(dayDiv);
+    }
+  }
+
+  function selectDate(date) {
+    selectedDate = date;
+    const formatted = date.toISOString().split('T')[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    input.value = `${year}년 ${month}월 ${day}일`;
+    input.dataset.dateValue = formatted;
+    hiddenInput.value = formatted;
+    calendar.classList.add('hidden');
+    renderCalendar();
+  }
+
+  // Event listeners
+  input.addEventListener('click', function(e) {
+    e.stopPropagation();
+    calendar.classList.toggle('hidden');
+    if (!calendar.classList.contains('hidden')) {
+      yearSelect.value = selectedDate.getFullYear();
+      monthSelect.value = selectedDate.getMonth() + 1;
+      renderCalendar();
+    }
+  });
+
+  yearSelect.addEventListener('change', renderCalendar);
+  monthSelect.addEventListener('change', renderCalendar);
+
+  prevBtn.addEventListener('click', function() {
+    let month = parseInt(monthSelect.value) - 1;
+    let year = parseInt(yearSelect.value);
+    if (month < 1) {
+      month = 12;
+      year--;
+    }
+    if (year >= minDate.getFullYear()) {
+      yearSelect.value = year;
+      monthSelect.value = month;
+      renderCalendar();
+    }
+  });
+
+  nextBtn.addEventListener('click', function() {
+    let month = parseInt(monthSelect.value) + 1;
+    let year = parseInt(yearSelect.value);
+    if (month > 12) {
+      month = 1;
+      year++;
+    }
+    if (year <= maxDate.getFullYear()) {
+      yearSelect.value = year;
+      monthSelect.value = month;
+      renderCalendar();
+    }
+  });
+
+  todayBtn.addEventListener('click', function() {
+    const today = new Date();
+    if (today <= maxDate && today >= minDate) {
+      selectDate(today);
+    }
+  });
+
+  closeBtn.addEventListener('click', function() {
+    calendar.classList.add('hidden');
+  });
+
+  // Close calendar when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!calendar.contains(e.target) && e.target !== input) {
+      calendar.classList.add('hidden');
+    }
+  });
+
+  // Initial render
+  renderCalendar();
+})();
+</script>

@@ -1,0 +1,108 @@
+<div class="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10">
+      <!-- 에러 메시지 -->
+      <% if @user&.errors&.any? %>
+        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <div class="text-sm text-red-700">
+                <h3 class="font-medium mb-2">다음 문제들을 해결해주세요:</h3>
+                <ul class="list-disc pl-5 space-y-1">
+                  <% @user.errors.full_messages.each do |message| %>
+                    <li><%= message %></li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <%= form_with model: @user, url: registrations_path, local: true, class: "space-y-6" do |form| %>
+        <div>
+          <label for="user_email_address" class="block text-sm font-medium text-gray-700 mb-2">
+            이메일 주소 <span class="text-red-500">*</span>
+          </label>
+          <%= form.email_field :email_address, 
+              required: true, 
+              autofocus: true, 
+              autocomplete: "email", 
+              placeholder: "your@example.com",
+              class: "w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors text-gray-900 placeholder-gray-500 outline-none #{'border-red-300' if @user&.errors&.include?(:email_address)}" %>
+        </div>
+
+        <div>
+          <label for="user_password" class="block text-sm font-medium text-gray-700 mb-2">
+            비밀번호 <span class="text-red-500">*</span>
+          </label>
+          <%= form.password_field :password, 
+              required: true, 
+              autocomplete: "new-password", 
+              placeholder: "8자 이상의 비밀번호",
+              minlength: 8,
+              class: "w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors text-gray-900 placeholder-gray-500 outline-none #{'border-red-300' if @user&.errors&.include?(:password)}" %>
+          <p class="mt-1 text-xs text-gray-500">최소 8자 이상이어야 합니다</p>
+        </div>
+
+        <div>
+          <label for="user_password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
+            비밀번호 확인 <span class="text-red-500">*</span>
+          </label>
+          <%= form.password_field :password_confirmation, 
+              required: true, 
+              autocomplete: "new-password", 
+              placeholder: "비밀번호를 다시 입력하세요",
+              class: "w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors text-gray-900 placeholder-gray-500 outline-none #{'border-red-300' if @user&.errors&.include?(:password_confirmation)}" %>
+        </div>
+
+        <%#<div class="bg-orange-50 border border-orange-200 rounded-lg p-4">%>
+        <%#  <div class="flex">%>
+        <%#    <div class="flex-shrink-0">%>
+        <%#      <svg class="h-5 w-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">%>
+        <%#        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>%>
+        <%#      </svg>%>
+        <%#    </div>%>
+        <%#    <div class="ml-3">%>
+        <%#      <p class="text-sm text-orange-700">%>
+        <%#        가입하시면 케이크몰의 %>
+        <%#        <a href="#" class="underline hover:no-underline">이용약관</a>과 %>
+        <%#        <a href="#" class="underline hover:no-underline">개인정보처리방침</a>에 %>
+        <%#        동의하는 것으로 간주됩니다.%>
+        <%#      </p>%>
+        <%#    </div>%>
+        <%#  </div>%>
+        <%#</div>%>
+
+        <div>
+          <%= form.submit "회원가입", 
+              class: "w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors cursor-pointer" %>
+        </div>
+      <% end %>
+
+      <div class="mt-6">
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-300"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-2 bg-white text-gray-500">이미 계정이 있으신가요?</span>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <%= link_to new_session_path, 
+              class: "w-full flex justify-center py-3 px-4 border border-gray-300 rounded-xl shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors" do %>
+            로그인하기
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,81 @@
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">내 방문 노트</h1>
+    <p class="text-gray-600">즐겨찾기한 가게들의 방문 기록</p>
+  </div>
+
+  <% if @notes.any? %>
+    <% @notes_by_month.each do |month, notes| %>
+      <div class="mb-8">
+        <h2 class="text-lg font-semibold text-gray-700 mb-4 pb-2 border-b">
+          <%= month.strftime("%Y년 %m월") %>
+        </h2>
+
+        <div class="space-y-4">
+          <% notes.each do |note| %>
+            <div class="bg-white rounded-lg shadow-sm border p-5 hover:shadow-md transition-shadow">
+              <div class="flex items-start justify-between mb-3">
+                <div>
+                  <%= link_to note.bakery.name, bakery_path(note.bakery),
+                      class: "text-lg font-semibold text-gray-900 hover:text-orange-600 transition-colors" %>
+                  <p class="text-sm text-gray-500 mt-1">
+                    방문일: <%= note.visit_date.strftime("%Y년 %m월 %d일") %>
+                  </p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <%= link_to bakery_note_path(note.bakery, note),
+                      class: "text-gray-400 hover:text-gray-600 transition-colors" do %>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5l7 7-7 7" />
+                    </svg>
+                  <% end %>
+                </div>
+              </div>
+
+              <div class="text-gray-700 mb-3">
+                <%= truncate(note.content, length: 150) %>
+              </div>
+
+              <% if note.images.attached? %>
+                <div class="flex gap-2 mt-3">
+                  <% note.images.first(4).each do |image| %>
+                    <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-100">
+                      <%= image_tag image, class: "w-full h-full object-cover" %>
+                    </div>
+                  <% end %>
+                  <% if note.images.count > 4 %>
+                    <div class="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center">
+                      <span class="text-gray-500 text-sm">+<%= note.images.count - 4 %></span>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+
+              <div class="flex gap-3 mt-4 pt-3 border-t text-sm">
+                <%= link_to "노트 보기", bakery_note_path(note.bakery, note),
+                    class: "text-orange-600 hover:text-orange-700 font-medium" %>
+                <%= link_to "가게 정보", bakery_path(note.bakery),
+                    class: "text-gray-600 hover:text-gray-700" %>
+                <%= link_to "이 가게의 노트 전체", bakery_notes_path(note.bakery),
+                    class: "text-gray-600 hover:text-gray-700" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="bg-white rounded-lg p-12 text-center">
+      <svg class="w-20 h-20 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">아직 작성한 노트가 없습니다</h3>
+      <p class="text-gray-500 mb-6">즐겨찾기한 가게를 방문하고 노트를 남겨보세요</p>
+      <%= link_to "즐겨찾기 가게 보기", favorites_path,
+          class: "inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors" %>
+    </div>
+  <% end %>
+</div>

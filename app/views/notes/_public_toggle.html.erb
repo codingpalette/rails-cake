@@ -1,0 +1,9 @@
+<div id="note_public_toggle_<%= note.id %>" class="flex items-center gap-3">
+  <span class="text-sm text-gray-600">가게 이야기에 공개</span>
+  <%= button_to toggle_public_bakery_note_path(note.bakery, note),
+      method: :patch,
+      form: { data: { turbo_frame: "_top" } },
+      class: "relative inline-flex h-6 w-11 items-center rounded-full transition-colors #{note.is_public ? 'bg-orange-600' : 'bg-gray-200'}" do %>
+    <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform <%= note.is_public ? 'translate-x-6' : 'translate-x-1' %>"></span>
+  <% end %>
+</div>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <title>요청을 처리할 수 없습니다 (422)</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #fab1a0 0%, #e17055 100%);
+      color: #2d3436;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      padding: 60px 40px;
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .cake-icon {
+      font-size: 80px;
+      margin-bottom: 30px;
+      animation: tilt 1s ease-in-out;
+    }
+
+    @keyframes tilt {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(-10deg); }
+      75% { transform: rotate(10deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    .error-code {
+      font-size: 100px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      line-height: 1;
+    }
+
+    h1 {
+      color: #2d3436;
+      font-size: 28px;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    p {
+      color: #636e72;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 40px;
+    }
+
+    .home-button {
+      display: inline-block;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(225, 112, 85, 0.3);
+    }
+
+    .home-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(225, 112, 85, 0.4);
+    }
+
+    .info {
+      margin-top: 50px;
+      padding-top: 40px;
+      border-top: 2px solid #f5f6fa;
+    }
+
+    .info p {
+      font-size: 14px;
+      color: #b2bec3;
+      margin-bottom: 0;
+    }
+
+    .tips {
+      margin-top: 30px;
+      text-align: left;
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 12px;
+    }
+
+    .tips h3 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      color: #2d3436;
+    }
+
+    .tips ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .tips li {
+      font-size: 14px;
+      color: #636e72;
+      padding: 4px 0;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .tips li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #00b894;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="cake-icon">🍰</div>
+    <div class="error-code">422</div>
+    <h1>요청을 처리할 수 없습니다</h1>
+    <p>
+      입력하신 정보를 처리할 수 없습니다.<br>
+      입력 내용을 확인하고 다시 시도해주세요.
+    </p>
+
+    <div class="tips">
+      <h3>확인해주세요:</h3>
+      <ul>
+        <li>모든 필수 항목을 입력했는지 확인</li>
+        <li>이메일 형식이 올바른지 확인</li>
+        <li>비밀번호가 조건을 충족하는지 확인</li>
+        <li>권한이 있는 작업인지 확인</li>
+      </ul>
+    </div>
+
+    <a href="/" class="home-button">홈으로 돌아가기</a>
+
+    <div class="info">
+      <p>문제가 계속되면 새로고침 후 다시 시도해주세요</p>
+    </div>
+  </div>
+</body>
+</html>

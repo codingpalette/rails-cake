@@ -1,0 +1,441 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header with bakery image -->
+  <div class="relative h-64 bg-gray-900">
+    <% if @bakery.images? %>
+      <img src="<%= @bakery.first_image_url %>" class="w-full h-full object-cover opacity-80" alt="<%= @bakery.name %>">
+    <% else %>
+      <div class="w-full h-full bg-gradient-to-r from-gray-800 to-gray-900"></div>
+    <% end %>
+    
+    <!-- Back button -->
+    <%= link_to root_path, class: "absolute top-4 left-4 bg-white/90 hover:bg-white rounded-full p-2 transition-colors" do %>
+      <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    <% end %>
+    
+    <!-- Favorite and Notes buttons -->
+    <% if authenticated? %>
+      <div class="absolute top-4 right-4 flex space-x-2">
+        <% if current_user.favorites.exists?(bakery: @bakery) %>
+          <%= link_to bakery_notes_path(@bakery),
+              class: "bg-white/90 hover:bg-white rounded-full p-2 transition-colors",
+              title: "나의 노트" do %>
+            <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+          <% end %>
+        <% end %>
+        <%= render 'shared/favorite_button',
+            bakery: @bakery,
+            favorited: current_user.favorites.exists?(bakery: @bakery) %>
+      </div>
+    <% else %>
+      <%= link_to new_session_path, 
+          class: "absolute top-4 right-4 bg-white/90 hover:bg-white rounded-full p-2 transition-colors",
+          title: "로그인이 필요합니다" do %>
+        <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+        </svg>
+      <% end %>
+    <% end %>
+    
+    <!-- Share button -->
+    <!--
+    <button class="absolute top-4 right-16 bg-white/90 hover:bg-white rounded-full p-2 transition-colors">
+      <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m9.032 4.026a3 3 0 10-2.684-4.684m2.684 4.684a3 3 0 00-2.684-4.684m0 0a3 3 0 00-2.684 4.684m2.684-4.684a3 3 0 00-2.684-4.684"></path>
+      </svg>
+    </button>
+    -->
+    
+    <!-- Category badge -->
+    <div class="absolute bottom-4 left-4">
+      <span class="bg-black/70 text-white px-3 py-1.5 rounded-lg text-sm font-medium">
+        <%= @bakery.category %>
+      </span>
+    </div>
+    
+  </div>
+  
+  <!-- Main content -->
+  <div class="max-w-4xl mx-auto px-4 py-6">
+    <!-- Bakery name and basic info -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-4">
+      <h1 class="text-2xl font-bold text-gray-900 mb-1"><%= @bakery.name %></h1>
+      <p class="text-gray-600 text-sm mb-4"><%= @bakery.category %></p>
+      
+      <!-- Info items -->
+      <div class="space-y-3">
+        <!-- Address -->
+        <div class="flex items-start gap-3">
+          <svg class="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          <div class="flex-1">
+            <p class="font-medium">주소</p>
+            <p class="text-gray-900">
+              <% if @bakery.road_address.present? %>
+                <%= @bakery.road_address %>
+                <% if @bakery.detail_address.present? %>
+                  <%= @bakery.detail_address %>
+                <% end %>
+              <% elsif @bakery.jibun_address.present? %>
+                <%= @bakery.jibun_address %>
+                <% if @bakery.detail_address.present? %>
+                  <%= @bakery.detail_address %>
+                <% end %>
+              <% else %>
+                주소 정보가 없습니다
+              <% end %>
+            </p>
+          </div>
+        </div>
+        
+        <!-- Phone -->
+        <div class="flex items-center gap-3">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+          </svg>
+          <div class="flex-1">
+            <p class="font-medium">전화번호</p>
+            <p class="text-gray-900"><%= @bakery.phone %></p>
+          </div>
+        </div>
+        
+        <!-- Hours -->
+        <div class="flex items-start gap-3">
+          <svg class="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div class="flex-1">
+            <p class="font-medium mb-2">운영시간</p>
+            <div class="space-y-1">
+              <% %w[monday tuesday wednesday thursday friday saturday sunday].each_with_index do |day, index| %>
+                <% day_name = %w[월 화 수 목 금 토 일][index] %>
+                <% hours_data = @bakery.operating_hours_data[day] %>
+                <% is_today = Date.current.strftime("%A").downcase == day %>
+                
+                <div class="flex items-center justify-between <%= 'font-semibold text-orange-600' if is_today %>">
+                  <span class="text-sm <%= is_today ? 'text-orange-600' : 'text-gray-700' %>">
+                    <%= day_name %>
+                  </span>
+                  <div class="text-sm <%= is_today ? 'text-orange-600' : 'text-gray-900' %>">
+                    <% if hours_data["closed"] %>
+                      휴무
+                    <% else %>
+                      <div>
+                        <span><%= hours_data["open_time"] %> - <%= hours_data["close_time"] %></span>
+                        <% if hours_data["last_order"].present? %>
+                          <div class="text-xs text-gray-500 <%= 'text-orange-500' if is_today %>">
+                            <%= hours_data["last_order"] %> 라스트오더
+                          </div>
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Description -->
+    <% if @bakery.description.present? %>
+      <div class="bg-white rounded-xl shadow-sm p-6 mb-4">
+        <h2 class="text-lg font-semibold text-gray-900 mb-3">가게 소개</h2>
+        <p class="text-gray-700 leading-relaxed"><%= @bakery.description %></p>
+      </div>
+    <% end %>
+    
+    <!-- Tabs Section -->
+    <div class="bg-white rounded-xl shadow-sm mb-4">
+      <!-- Tab Navigation -->
+      <div class="border-b border-gray-200">
+        <nav class="flex" aria-label="Tabs">
+          <button id="menu-tab" 
+                  onclick="switchTab('menu')" 
+                  class="tab-button active px-6 py-4 text-sm font-medium border-b-2 border-orange-500 text-orange-600">
+            메뉴
+          </button>
+          <button id="story-tab" 
+                  onclick="switchTab('story')" 
+                  class="tab-button px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+            이야기
+          </button>
+          <button id="photos-tab" 
+                  onclick="switchTab('photos')" 
+                  class="tab-button px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">
+            매장사진
+          </button>
+        </nav>
+      </div>
+      
+      <!-- Tab Content -->
+      <div class="p-6">
+        <!-- Menu Tab Content -->
+        <div id="menu-content" class="tab-content">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900">메뉴</h2>
+            <% if authenticated? && current_user&.admin? %>
+              <button onclick="openAddMenuModal()" class="text-sm text-orange-600 hover:text-orange-700 font-medium">
+                + 메뉴 추가
+              </button>
+            <% end %>
+          </div>
+          
+          <% if @menu_items && @menu_items.any? %>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <% @menu_items.each do |item| %>
+                <div class="flex gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  <% if item.image? %>
+                    <img src="<%= item.image_url %>" class="w-24 h-24 object-cover rounded-lg" alt="<%= item.name %>">
+                  <% else %>
+                    <div class="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center">
+                      <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                    </div>
+                  <% end %>
+                  
+                  <div class="flex-1">
+                    <h3 class="font-semibold text-gray-900"><%= item.name %></h3>
+                    <% if item.description.present? %>
+                      <p class="text-sm text-gray-600 mt-1"><%= item.description %></p>
+                    <% end %>
+                    <p class="text-lg font-bold text-gray-900 mt-2">
+                      <%= number_to_currency(item.price, unit: "", precision: 0) %>원
+                    </p>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
+              <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <p class="text-gray-500">아직 등록된 메뉴가 없습니다</p>
+              <% if current_user&.admin? %>
+                <button onclick="openAddMenuModal()" class="mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+                  첫 메뉴 추가하기
+                </button>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+        
+        <!-- Story Tab Content -->
+        <div id="story-content" class="tab-content hidden">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">
+            가게 이야기
+            <% if @bakery.notes.public_notes.count > 0 %>
+              <span class="ml-2 text-sm font-normal text-gray-500">
+                (<%= @bakery.notes.public_notes.count %>개)
+              </span>
+            <% end %>
+          </h2>
+
+          <% if @bakery.notes.public_notes.any? %>
+            <script>
+              // Store note images data
+              if (typeof window.noteImagesData === 'undefined') {
+                window.noteImagesData = {};
+              }
+
+              <% @bakery.notes.public_notes.recent.limit(5).each do |note| %>
+                <% if note.images? %>
+                  window.noteImagesData[<%= note.id %>] = <%= note.images_urls.to_json.html_safe %>;
+                <% end %>
+              <% end %>
+            </script>
+            <div class="space-y-4">
+              <% @bakery.notes.public_notes.includes(:user, images_attachments: :blob).recent.limit(5).each do |note| %>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <!-- 작성자 정보 -->
+                  <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center space-x-2">
+                      <% if note.user.profile_image? %>
+                        <img src="<%= note.user.profile_image_url %>" class="w-8 h-8 rounded-full object-cover" alt="">
+                      <% else %>
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-white text-xs font-bold">
+                          <%= note.user.email_address[0].upcase %>
+                        </div>
+                      <% end %>
+                      <div>
+                        <p class="text-sm font-medium text-gray-900"><%= note.user.email_address.split('@')[0] %></p>
+                        <p class="text-xs text-gray-500"><%= note.visit_date.strftime("%Y.%m.%d") %> 방문</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 노트 내용 -->
+                  <div class="text-gray-700 text-sm mb-3">
+                    <%= truncate(note.content, length: 200) %>
+                  </div>
+
+                  <!-- 이미지 미리보기 -->
+                  <% if note.images? %>
+                    <div class="flex gap-2">
+                      <% note.images_urls.first(3).each_with_index do |url, img_index| %>
+                        <div class="w-16 h-16 rounded overflow-hidden bg-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
+                             onclick="openNoteImageModal(<%= note.id %>, <%= img_index %>)">
+                          <img src="<%= url %>" class="w-full h-full object-cover" alt="">
+                        </div>
+                      <% end %>
+                      <% if note.images_count > 3 %>
+                        <div class="w-16 h-16 rounded bg-gray-200 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+                             onclick="openNoteImageModal(<%= note.id %>, 3)">
+                          <span class="text-gray-500 text-xs">+<%= note.images_count - 3 %></span>
+                        </div>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+
+              <!-- 더보기 링크 -->
+              <div class="text-center pt-4">
+                <%= link_to "모든 이야기 보기", bakery_stories_path(@bakery),
+                    class: "text-orange-600 hover:text-orange-700 font-medium text-sm" %>
+              </div>
+            </div>
+          <% else %>
+            <div class="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
+              <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+              </svg>
+              <p class="text-gray-500 mb-2">아직 공개된 이야기가 없습니다</p>
+              <% if authenticated? && current_user.favorites.exists?(bakery: @bakery) %>
+                <%= link_to "첫 이야기 남기기", new_bakery_note_path(@bakery),
+                    class: "mt-4 inline-block px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm" %>
+              <% elsif authenticated? %>
+                <p class="text-xs text-gray-400 mt-2">즐겨찾기 후 이야기를 남길 수 있습니다</p>
+              <% else %>
+                <p class="text-xs text-gray-400 mt-2">로그인 후 이야기를 남길 수 있습니다</p>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+        
+        <!-- Photos Tab Content -->
+        <div id="photos-content" class="tab-content hidden">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">매장사진</h2>
+          <% if @bakery.images? %>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <% @bakery.images_urls.each_with_index do |url, index| %>
+                <div class="relative group cursor-pointer" onclick="openImageModal(<%= index %>)">
+                  <img src="<%= url %>" class="w-full aspect-3/2 object-cover rounded-lg group-hover:opacity-80 transition-opacity" alt="">
+                  <% if index == 0 %>
+                    <span class="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">메인</span>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
+              <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              <p class="text-gray-500">아직 등록된 매장사진이 없습니다</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Menu Modal (for admin) -->
+<% if current_user&.admin? %>
+  <div id="addMenuModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+      <h3 class="text-lg font-semibold mb-4">메뉴 추가</h3>
+      <%= form_with model: [@bakery, MenuItem.new], local: true, data: { turbo: false } do |form| %>
+        <div class="space-y-4">
+          <div>
+            <%= form.label :name, "메뉴명", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= form.text_field :name, required: true, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" %>
+          </div>
+
+          <div>
+            <%= form.label :price, "가격", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= form.number_field :price, required: true, min: 0, step: 100, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" %>
+          </div>
+
+          <div>
+            <%= form.label :description, "설명", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= form.text_area :description, rows: 3, class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" %>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">이미지</label>
+            <input type="file" name="menu_item[cloudflare_image]" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+          </div>
+        </div>
+
+        <div class="flex gap-3 mt-6">
+          <button type="button" onclick="closeAddMenuModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+            취소
+          </button>
+          <%= form.submit "추가", class: "flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 cursor-pointer" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<!-- Image Modal -->
+<% if @bakery.images? %>
+  <div id="imageModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50" onclick="closeImageModal()">
+    <div class="max-w-4xl max-h-full p-4">
+      <button onclick="closeImageModal()" class="absolute top-2 right-2 text-white hover:text-gray-300">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      <img id="modalImage" src="" alt="가게 사진" class="max-w-full max-h-full object-contain rounded-lg">
+      
+      <!-- Navigation buttons (only show if more than 1 image) -->
+      <% if @bakery.images_count > 1 %>
+        <button id="prevBtn" onclick="changeImage(-1); event.stopPropagation();" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 bg-black/30 rounded-full p-2">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <button id="nextBtn" onclick="changeImage(1); event.stopPropagation();" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 bg-black/30 rounded-full p-2">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+      <% end %>
+      
+      <!-- Image counter -->
+      <div id="imageCounter" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Initialize bakery images data
+    window.bakeryImages = <%= @bakery.images_urls.to_json.html_safe %>;
+  </script>
+<% end %>
+
+<!-- Import JavaScript modules -->
+<script type="module">
+  import { initializeImageModal, initializeNoteImageModal } from 'bakery_image_modal';
+  import { initializeTabs } from 'bakery_tabs';
+  <% if current_user&.admin? %>
+  import { initializeMenuModal } from 'bakery_menu_modal';
+  <% end %>
+
+  // Initialize all modules
+  initializeImageModal();
+  initializeNoteImageModal();
+  <% if current_user&.admin? %>
+  initializeMenuModal();
+  <% end %>
+</script>

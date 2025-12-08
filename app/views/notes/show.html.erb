@@ -1,0 +1,240 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-4xl mx-auto px-4">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <!-- 헤더 -->
+      <div class="bg-gradient-to-r from-amber-500 to-orange-600 px-8 py-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-bold text-white"><%= @bakery.name %></h1>
+            <p class="text-amber-50 mt-1">
+              <%= @note.visit_date.strftime("%Y년 %m월 %d일") %> 방문
+            </p>
+          </div>
+          <div class="flex space-x-2">
+            <%= link_to edit_bakery_note_path(@bakery, @note),
+                class: "text-white hover:text-black",
+                title: "노트 수정" do %>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+            <% end %>
+            <%= button_to bakery_note_path(@bakery, @note), method: :delete,
+                data: { turbo_confirm: "정말 삭제하시겠습니까?" },
+                class: "text-white hover:text-black",
+                title: "노트 삭제" do %>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- 내용 -->
+      <div class="p-8">
+        <!-- 공개 설정 토글 -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+          <%= render 'public_toggle', note: @note %>
+        </div>
+
+        <!-- 날짜 정보 -->
+        <div class="flex flex-col  space-x-4 text-sm text-gray-600 mb-6 gap-4">
+          <div class="flex items-center space-x-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
+            </svg>
+            <span>가게: <%= @note.bakery.name %></span>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <span>방문일: <%= @note.visit_date.strftime("%Y년 %m월 %d일") %></span>
+          </div>
+          <!-- 
+          <div class="flex items-center space-x-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>작성일: <%= @note.created_at.strftime("%Y.%m.%d %H:%M") %></span>
+          </div>
+            -->
+        </div>
+
+        <!-- 노트 내용 -->
+        <div class="prose max-w-none mb-8">
+          <div class="text-gray-800 whitespace-pre-wrap leading-relaxed"><%= @note.content %></div>
+        </div>
+
+        <!-- 이미지 갤러리 -->
+        <% if @note.images.attached? %>
+          <div class="border-t border-gray-200 pt-8">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+              사진 (<%= @note.images.count %>장)
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <% @note.images.each_with_index do |image, index| %>
+                <div class="relative group cursor-pointer bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                  <%= image_tag image,
+                      class: "w-full h-48 object-cover rounded-lg hover:opacity-95 transition",
+                      alt: "노트 이미지 #{index + 1}",
+                      loading: "lazy",
+                      style: "background-color: #f3f4f6;",
+                      onerror: "this.style.display='none'; this.nextElementSibling.style.display='flex';" %>
+                  <div class="hidden w-full h-48 bg-gray-200 flex flex-col items-center justify-center text-gray-500 rounded-lg">
+                    <svg class="w-12 h-12 mb-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                    </svg>
+                    <p class="text-sm">이미지 로드 실패</p>
+                    <p class="text-xs">URL: <%= url_for(image) %></p>
+                  </div>
+                  <%#<div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity flex items-center justify-center pointer-events-none">%>
+                  <%#  <div class="opacity-0 group-hover:opacity-100 transition-opacity bg-black bg-opacity-50 rounded-full p-2">%>
+                  <%#    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">%>
+                  <%#      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>%>
+                  <%#    </svg>%>
+                  <%#  </div>%>
+                  <%#</div>%>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- 하단 네비게이션 -->
+      <div class="border-t border-gray-200 px-8 py-4 bg-gray-50">
+        <div class="flex items-center justify-between">
+          <%= link_to bakery_notes_path(@bakery), class: "text-gray-600 hover:text-gray-900 inline-flex items-center" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            노트 목록
+          <% end %>
+          <%= link_to @bakery, class: "text-gray-600 hover:text-gray-900 inline-flex items-center" do %>
+            가게 정보
+            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 이미지 모달 -->
+<div id="imageModal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden" onclick="closeImageModal()">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="relative max-w-7xl max-h-full" onclick="event.stopPropagation()">
+      <img id="modalImage" src="" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+           onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgNjBWMTQwTTYwIDEwMEgxNDAiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSI0IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPC9zdmc+Cjwvc3ZnPgo='">
+
+      <!-- 닫기 버튼 -->
+      <button class="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors bg-black bg-opacity-50 rounded-full p-2"
+              onclick="closeImageModal()">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+
+      <!-- 이미지 정보 -->
+      <div id="imageInfo" class="absolute -bottom-16 left-0 right-0 text-center text-white bg-black bg-opacity-50 rounded-lg p-2">
+        <span id="imageIndex"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentImages = [];
+let currentImageIndex = 0;
+
+function openImageModal(imageUrl, index = 0) {
+  // 모든 이미지 URL 수집
+  currentImages = [];
+  <% if @note.images.attached? %>
+    <% @note.images.each do |image| %>
+      currentImages.push('<%= url_for(image) %>');
+    <% end %>
+  <% end %>
+
+  currentImageIndex = index;
+  showImage();
+  document.getElementById('imageModal').classList.remove('hidden');
+
+  // ESC 키로 닫기
+  document.addEventListener('keydown', handleKeyPress);
+}
+
+function showImage() {
+  const modalImage = document.getElementById('modalImage');
+  const imageInfo = document.getElementById('imageInfo');
+  const imageIndex = document.getElementById('imageIndex');
+
+  if (currentImages.length > 0) {
+    modalImage.src = currentImages[currentImageIndex];
+    imageIndex.textContent = `${currentImageIndex + 1} / ${currentImages.length}`;
+  }
+}
+
+function closeImageModal() {
+  document.getElementById('imageModal').classList.add('hidden');
+  document.removeEventListener('keydown', handleKeyPress);
+}
+
+function nextImage() {
+  if (currentImageIndex < currentImages.length - 1) {
+    currentImageIndex++;
+    showImage();
+  }
+}
+
+function prevImage() {
+  if (currentImageIndex > 0) {
+    currentImageIndex--;
+    showImage();
+  }
+}
+
+function handleKeyPress(event) {
+  switch(event.key) {
+    case 'Escape':
+      closeImageModal();
+      break;
+    case 'ArrowLeft':
+      prevImage();
+      break;
+    case 'ArrowRight':
+      nextImage();
+      break;
+  }
+}
+
+// 터치 스와이프 지원 (모바일)
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.getElementById('imageModal').addEventListener('touchstart', function(e) {
+  touchStartX = e.changedTouches[0].screenX;
+});
+
+document.getElementById('imageModal').addEventListener('touchend', function(e) {
+  touchEndX = e.changedTouches[0].screenX;
+  handleSwipe();
+});
+
+function handleSwipe() {
+  const swipeThreshold = 50;
+  const diff = touchStartX - touchEndX;
+
+  if (Math.abs(diff) > swipeThreshold) {
+    if (diff > 0) {
+      nextImage(); // 왼쪽으로 스와이프 = 다음 이미지
+    } else {
+      prevImage(); // 오른쪽으로 스와이프 = 이전 이미지
+    }
+  }
+}
+</script>

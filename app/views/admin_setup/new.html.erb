@@ -1,0 +1,141 @@
+<div class="min-h-screen bg-gradient-to-br from-orange-50 to-pink-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <!-- 특별한 로고 -->
+    <div class="flex justify-center">
+      <div class="relative">
+        <div class="w-20 h-20 bg-gradient-to-r from-red-500 to-orange-500 rounded-xl flex items-center justify-center shadow-2xl transform rotate-3">
+          <span class="text-white text-4xl font-bold">👑</span>
+        </div>
+        <div class="absolute -top-2 -right-2">
+          <span class="flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    <h2 class="mt-6 text-center text-3xl font-bold text-gray-900">
+      최초 관리자 설정
+    </h2>
+    <p class="mt-2 text-center text-sm text-gray-600">
+      케이크몰의 첫 번째 관리자가 되어주세요! 🎉
+    </p>
+  </div>
+
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="bg-white py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 border-2 border-orange-200">
+      <!-- 안내 메시지 -->
+      <div class="mb-6 bg-gradient-to-r from-orange-50 to-pink-50 border border-orange-200 rounded-lg p-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-orange-700">
+              <strong>환영합니다!</strong> 아직 관리자가 없습니다.<br>
+              지금 생성하는 계정이 케이크몰의 <strong>최초 관리자</strong>가 됩니다.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 에러 메시지 -->
+      <% if @user&.errors&.any? %>
+        <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <div class="text-sm text-red-700">
+                <ul class="list-disc pl-5 space-y-1">
+                  <% @user.errors.full_messages.each do |message| %>
+                    <li><%= message %></li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <%= form_with model: @user, url: admin_setup_path, local: true, class: "space-y-6" do |form| %>
+        <div>
+          <label for="user_email_address" class="block text-sm font-medium text-gray-700 mb-2">
+            관리자 이메일 주소 <span class="text-red-500">*</span>
+          </label>
+          <%= form.email_field :email_address, 
+              required: true, 
+              autofocus: true, 
+              autocomplete: "email", 
+              placeholder: "admin@example.com",
+              class: "w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors text-gray-900 placeholder-gray-500 outline-none" %>
+          <p class="mt-1 text-xs text-gray-500">이 이메일로 관리자 로그인을 하게 됩니다</p>
+        </div>
+
+        <div>
+          <label for="user_password" class="block text-sm font-medium text-gray-700 mb-2">
+            비밀번호 <span class="text-red-500">*</span>
+          </label>
+          <%= form.password_field :password, 
+              required: true, 
+              autocomplete: "new-password", 
+              placeholder: "강력한 비밀번호를 설정하세요",
+              minlength: 8,
+              class: "w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors text-gray-900 placeholder-gray-500 outline-none" %>
+          <p class="mt-1 text-xs text-gray-500">최소 8자 이상, 안전한 비밀번호를 사용하세요</p>
+        </div>
+
+        <div>
+          <label for="user_password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
+            비밀번호 확인 <span class="text-red-500">*</span>
+          </label>
+          <%= form.password_field :password_confirmation, 
+              required: true, 
+              autocomplete: "new-password", 
+              placeholder: "비밀번호를 다시 입력하세요",
+              class: "w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors text-gray-900 placeholder-gray-500 outline-none" %>
+        </div>
+
+        <!-- 권한 안내 -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <svg class="h-5 w-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-red-800">관리자 권한</h3>
+              <div class="text-sm text-red-700 mt-1">
+                <ul class="list-disc pl-5 space-y-1">
+                  <li>가게 등록 및 관리</li>
+                  <li>사용자 관리</li>
+                  <li>다른 관리자 지정</li>
+                  <li>시스템 전체 관리</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <%= form.submit "🚀 관리자 계정 생성하기", 
+              class: "w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200 cursor-pointer" %>
+        </div>
+      <% end %>
+
+      <div class="mt-6 text-center">
+        <p class="text-xs text-gray-500">
+          이 페이지는 관리자가 없을 때만 표시됩니다.<br>
+          관리자 생성 후에는 접근할 수 없습니다.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

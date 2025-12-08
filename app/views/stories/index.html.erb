@@ -1,0 +1,104 @@
+<div class="min-h-screen bg-gray-50 py-8">
+  <div class="max-w-4xl mx-auto px-4">
+    <!-- 헤더 -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900"><%= @bakery.name %>의 이야기</h1>
+          <p class="text-gray-600 mt-1">방문자들이 남긴 이야기를 읽어보세요</p>
+        </div>
+        <%= link_to @bakery, class: "text-gray-600 hover:text-gray-900" do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        <% end %>
+      </div>
+    </div>
+
+    <% if @public_notes.any? %>
+      <div class="space-y-6">
+        <% @public_notes.each do |note| %>
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+            <!-- 작성자 정보 -->
+            <div class="px-6 pt-6 pb-4 border-b">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <% if note.user.profile_image? %>
+                    <img src="<%= note.user.profile_image_url %>" class="w-10 h-10 rounded-full object-cover" alt="">
+                  <% else %>
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-white font-bold">
+                      <%= note.user.email_address[0].upcase %>
+                    </div>
+                  <% end %>
+                  <div>
+                    <p class="font-medium text-gray-900"><%= note.user.email_address.split('@')[0] %></p>
+                    <p class="text-sm text-gray-500">방문일: <%= note.visit_date.strftime("%Y년 %m월 %d일") %></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 노트 내용 -->
+            <div class="px-6 py-4">
+              <div class="text-gray-800 whitespace-pre-wrap leading-relaxed">
+                <%= note.content %>
+              </div>
+            </div>
+
+            <!-- 이미지 -->
+            <% if note.images? %>
+              <div class="px-6 pb-6">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <% note.images_urls.first(6).each do |url| %>
+                    <div class="aspect-w-1 aspect-h-1 bg-gray-100 rounded-lg overflow-hidden">
+                      <img src="<%= url %>" class="w-full h-full object-cover" alt="">
+                    </div>
+                  <% end %>
+                </div>
+                <% if note.images_count > 6 %>
+                  <p class="text-sm text-gray-500 mt-2">+<%= note.images_count - 6 %>장의 사진이 더 있습니다</p>
+                <% end %>
+              </div>
+            <% end %>
+
+            <!-- 작성 시간 -->
+            <div class="px-6 pb-4">
+              <p class="text-xs text-gray-400">
+                <%= time_ago_in_words(note.created_at) %>전 작성
+              </p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="bg-white rounded-xl p-12 text-center">
+        <svg class="w-20 h-20 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">아직 공개된 이야기가 없습니다</h3>
+        <p class="text-gray-500 mb-6">첫 번째 이야기를 남겨보세요!</p>
+
+        <% if authenticated? && Current.user.favorites.exists?(bakery: @bakery) %>
+          <%= link_to "노트 작성하기", new_bakery_note_path(@bakery),
+              class: "inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors" %>
+        <% elsif authenticated? %>
+          <p class="text-sm text-gray-500">즐겨찾기 후 노트를 작성할 수 있습니다</p>
+        <% else %>
+          <%= link_to "로그인하고 이야기 남기기", new_session_path,
+              class: "inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors" %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- 하단 액션 -->
+    <div class="mt-8 flex justify-center space-x-4">
+      <%= link_to "가게 정보로 돌아가기", @bakery,
+          class: "px-6 py-2 bg-white text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors" %>
+
+      <% if authenticated? && Current.user.favorites.exists?(bakery: @bakery) %>
+        <%= link_to "내 노트 보기", bakery_notes_path(@bakery),
+            class: "px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors" %>
+      <% end %>
+    </div>
+  </div>
+</div>
