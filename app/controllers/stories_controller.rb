@@ -3,7 +3,7 @@ class StoriesController < ApplicationController
   before_action :set_bakery
 
   def index
-    @public_notes = @bakery.notes.public_notes.includes(:user, images_attachments: :blob).recent
+    @public_notes = @bakery.notes.public_notes.includes(:user).recent
   end
 
   private

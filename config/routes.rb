@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
   resources :registrations, only: [:new, :create]
   resources :bakeries, only: [:new, :create, :show] do
+    collection do
+      get 'search'
+    end
     resources :menu_items, only: [:create, :destroy]
     resources :notes do
       member do

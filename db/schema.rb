@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_08_022756) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_08_050207) do
   create_table "bakeries", force: :cascade do |t|
     t.string "name"
     t.string "category"
@@ -25,6 +25,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_08_022756) do
     t.string "detail_address"
     t.string "extra_address"
     t.json "cloudflare_image_ids", default: []
+    t.string "store_type", default: "main", null: false
+    t.integer "parent_id"
+    t.index ["parent_id"], name: "index_bakeries_on_parent_id"
   end
 
   create_table "favorites", force: :cascade do |t|
@@ -80,6 +83,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_08_022756) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "bakeries", "bakeries", column: "parent_id"
   add_foreign_key "favorites", "bakeries"
   add_foreign_key "favorites", "users"
   add_foreign_key "menu_items", "bakeries"

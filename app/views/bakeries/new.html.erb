@@ -66,7 +66,7 @@
               <label class="block text-sm font-medium text-gray-700 mb-2">
                 카테고리 <span class="text-red-500">*</span>
               </label>
-              <%= form.select :category, 
+              <%= form.select :category,
                   options_for_select([
                     ['베이커리', '베이커리'],
                     ['카페', '카페'],
@@ -74,7 +74,7 @@
                     ['케이크샵', '케이크샵']
                   ]),
                   { prompt: '카테고리를 선택해주세요' },
-                  { 
+                  {
                     required: true,
                     class: "w-full px-4 py-3 pr-10 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors text-gray-900 bg-white appearance-none outline-none"
                   } %>
@@ -83,6 +83,45 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
               </div>
+            </div>
+
+            <!-- 매장 유형 -->
+            <div class="relative">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                매장 유형 <span class="text-red-500">*</span>
+              </label>
+              <%= form.select :store_type,
+                  options_for_select(Bakery::STORE_TYPES.map { |k, v| [v, k] }, 'main'),
+                  {},
+                  {
+                    required: true,
+                    id: "store_type_select",
+                    class: "w-full px-4 py-3 pr-10 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors text-gray-900 bg-white appearance-none outline-none"
+                  } %>
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none" style="top: 28px;">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+            </div>
+
+            <!-- 본점 선택 (지점/팝업인 경우) -->
+            <div id="parent_bakery_field" class="hidden">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                본점 선택
+              </label>
+              <%= form.hidden_field :parent_id, id: "parent_id_hidden" %>
+              <div class="flex space-x-2">
+                <div id="selected_parent_display" class="flex-1 px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-900">
+                  <span class="text-gray-500">본점을 선택해주세요</span>
+                </div>
+                <button type="button"
+                        onclick="openParentBakeryModal()"
+                        class="px-6 py-3 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 transition-colors whitespace-nowrap">
+                  본점 검색
+                </button>
+              </div>
+              <p class="mt-1 text-xs text-gray-500">지점이나 팝업의 경우 본점을 선택해주세요</p>
             </div>
           </div>
         </div>
@@ -704,16 +743,155 @@ function copyToAll() {
     close_time: document.querySelector('select[name="operating_hours[monday][close_time]"]').value,
     last_order: document.querySelector('select[name="operating_hours[monday][last_order]"]').value
   };
-  
+
   const days = ['tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  
+
   days.forEach(day => {
     document.querySelector(`input[name="operating_hours[${day}][closed]"]`).checked = mondayInputs.closed;
     document.querySelector(`select[name="operating_hours[${day}][open_time]"]`).value = mondayInputs.open_time;
     document.querySelector(`select[name="operating_hours[${day}][close_time]"]`).value = mondayInputs.close_time;
     document.querySelector(`select[name="operating_hours[${day}][last_order]"]`).value = mondayInputs.last_order;
-    
+
     toggleDayInputs(day);
   });
 }
+
+// 매장 유형 변경 시 본점 선택 필드 표시/숨김
+function initStoreTypeToggle() {
+  const storeTypeSelect = document.getElementById('store_type_select');
+  const parentBakeryField = document.getElementById('parent_bakery_field');
+  const parentIdSelect = document.getElementById('parent_id_select');
+
+  if (!storeTypeSelect || !parentBakeryField) return;
+
+  storeTypeSelect.addEventListener('change', function() {
+    if (this.value === 'main') {
+      parentBakeryField.classList.add('hidden');
+      if (parentIdSelect) parentIdSelect.value = '';
+    } else {
+      parentBakeryField.classList.remove('hidden');
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initStoreTypeToggle);
+document.addEventListener('turbo:load', initStoreTypeToggle);
+
+// 본점 검색 모달 관련 JavaScript
+const ParentBakeryModal = {
+  debounceTimer: null,
+
+  open: function() {
+    document.getElementById('parentBakeryModal').classList.remove('hidden');
+    document.getElementById('parentSearchInput').value = '';
+    document.getElementById('parentSearchResults').innerHTML = '';
+    setTimeout(() => document.getElementById('parentSearchInput').focus(), 100);
+    this.search('');
+  },
+
+  close: function() {
+    document.getElementById('parentBakeryModal').classList.add('hidden');
+  },
+
+  search: function(query) {
+    clearTimeout(this.debounceTimer);
+    this.debounceTimer = setTimeout(() => {
+      const resultsContainer = document.getElementById('parentSearchResults');
+      resultsContainer.innerHTML = '<div class="p-4 text-center text-gray-500">검색 중...</div>';
+
+      fetch(`/bakeries/search?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(bakeries => {
+          if (bakeries.length === 0) {
+            resultsContainer.innerHTML = '<div class="p-4 text-center text-gray-500">검색 결과가 없습니다</div>';
+            return;
+          }
+
+          resultsContainer.innerHTML = bakeries.map(bakery => `
+            <button type="button"
+                    onclick="ParentBakeryModal.select(${bakery.id}, '${bakery.name.replace(/'/g, "\\'")}')"
+                    class="w-full p-4 text-left hover:bg-orange-50 border-b border-gray-100 last:border-b-0 transition-colors">
+              <div class="font-medium text-gray-900">${bakery.name}</div>
+              <div class="text-sm text-gray-500">${bakery.address || '주소 정보 없음'}</div>
+            </button>
+          `).join('');
+        })
+        .catch(error => {
+          resultsContainer.innerHTML = '<div class="p-4 text-center text-red-500">검색 중 오류가 발생했습니다</div>';
+        });
+    }, 300);
+  },
+
+  select: function(id, name) {
+    document.getElementById('parent_id_hidden').value = id;
+    document.getElementById('selected_parent_display').innerHTML = `<span class="text-gray-900">${name}</span>`;
+
+    // 선택 해제 버튼 추가
+    const displayContainer = document.getElementById('selected_parent_display').parentElement;
+    let clearBtn = displayContainer.querySelector('.clear-parent-btn');
+    if (!clearBtn) {
+      clearBtn = document.createElement('button');
+      clearBtn.type = 'button';
+      clearBtn.className = 'clear-parent-btn px-4 py-3 bg-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-300 transition-colors';
+      clearBtn.onclick = clearParentBakery;
+      clearBtn.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+      displayContainer.appendChild(clearBtn);
+    }
+
+    this.close();
+  }
+};
+
+function openParentBakeryModal() {
+  ParentBakeryModal.open();
+}
+
+function clearParentBakery() {
+  document.getElementById('parent_id_hidden').value = '';
+  document.getElementById('selected_parent_display').innerHTML = '<span class="text-gray-500">본점을 선택해주세요</span>';
+
+  // 선택 해제 버튼 제거
+  const clearBtn = document.querySelector('.clear-parent-btn');
+  if (clearBtn) clearBtn.remove();
+}
 </script>
+
+<!-- 본점 검색 모달 -->
+<div id="parentBakeryModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+  <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+    <!-- 배경 오버레이 -->
+    <div class="fixed inset-0 bg-gray-500 opacity-75 transition-opacity" onclick="ParentBakeryModal.close()"></div>
+
+    <!-- 모달 컨텐츠 -->
+    <div class="relative bg-white rounded-2xl shadow-xl transform transition-all sm:max-w-lg sm:w-full mx-4 overflow-hidden">
+      <!-- 모달 헤더 -->
+      <div class="flex items-center justify-between p-6 border-b border-gray-100">
+        <h3 class="text-lg font-semibold text-gray-900">본점 검색</h3>
+        <button type="button" onclick="ParentBakeryModal.close()" class="text-gray-400 hover:text-gray-600 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 검색 입력 -->
+      <div class="p-6 border-b border-gray-100">
+        <div class="relative">
+          <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input type="text"
+                 id="parentSearchInput"
+                 placeholder="베이커리 이름으로 검색..."
+                 oninput="ParentBakeryModal.search(this.value)"
+                 class="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors text-gray-900 placeholder-gray-500 outline-none">
+        </div>
+      </div>
+
+      <!-- 검색 결과 -->
+      <div id="parentSearchResults" class="max-h-80 overflow-y-auto">
+        <!-- 검색 결과가 여기에 표시됩니다 -->
+      </div>
+    </div>
+  </div>
+</div>

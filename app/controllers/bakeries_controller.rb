@@ -1,7 +1,23 @@
 class BakeriesController < ApplicationController
   require_admin_access only: [:new, :create]
-  allow_unauthenticated_access only: [:show]
-  
+  allow_unauthenticated_access only: [:show, :search]
+
+  def search
+    query = params[:q].to_s.strip
+    exclude_id = params[:exclude_id]
+
+    bakeries = Bakery.main_stores
+    bakeries = bakeries.where.not(id: exclude_id) if exclude_id.present?
+
+    if query.present?
+      bakeries = bakeries.where("name LIKE ?", "%#{query}%")
+    end
+
+    bakeries = bakeries.limit(20).select(:id, :name, :road_address)
+
+    render json: bakeries.map { |b| { id: b.id, name: b.name, address: b.road_address } }
+  end
+
   def show
     @bakery = Bakery.find(params[:id])
     @menu_items = @bakery.menu_items if @bakery.respond_to?(:menu_items)
@@ -35,7 +51,8 @@ class BakeriesController < ApplicationController
   def bakery_params
     params.require(:bakery).permit(
       :name, :category, :phone, :description,
-      :postcode, :road_address, :jibun_address, :detail_address, :extra_address
+      :postcode, :road_address, :jibun_address, :detail_address, :extra_address,
+      :store_type, :parent_id
     )
   end
 

@@ -41,7 +41,8 @@ class Admin::BakeriesController < Admin::AdminController
   def bakery_params
     params.require(:bakery).permit(
       :name, :category, :phone, :description,
-      :postcode, :road_address, :jibun_address, :detail_address, :extra_address
+      :postcode, :road_address, :jibun_address, :detail_address, :extra_address,
+      :store_type, :parent_id
     )
   end
 
