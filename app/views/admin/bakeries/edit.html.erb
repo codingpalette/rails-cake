@@ -17,7 +17,7 @@
 
     <!-- 폼 -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <%= form_with model: [:admin, @bakery], local: true, class: "space-y-6" do |form| %>
+      <%= form_with model: [:admin, @bakery], local: true, multipart: true, class: "space-y-6" do |form| %>
         
         <% if @bakery.errors.any? %>
           <div class="p-6 bg-red-50 border-b border-red-100">
