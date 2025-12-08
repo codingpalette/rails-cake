@@ -55,8 +55,8 @@
                     </div>
                   <% end %>
                 </div>
-                <% if note.images_count > 6 %>
-                  <p class="text-sm text-gray-500 mt-2">+<%= note.images_count - 6 %>장의 사진이 더 있습니다</p>
+                <% if note.images_urls.count > 6 %>
+                  <p class="text-sm text-gray-500 mt-2">+<%= note.images_urls.count - 6 %>장의 사진이 더 있습니다</p>
                 <% end %>
               </div>
             <% end %>

@@ -38,16 +38,16 @@
                 <%= truncate(note.content, length: 150) %>
               </div>
 
-              <% if note.images.attached? %>
+              <% if note.images? %>
                 <div class="flex gap-2 mt-3">
-                  <% note.images.first(4).each do |image| %>
+                  <% note.images_urls.first(4).each do |url| %>
                     <div class="w-20 h-20 rounded-lg overflow-hidden bg-gray-100">
-                      <%= image_tag image, class: "w-full h-full object-cover" %>
+                      <img src="<%= url %>" class="w-full h-full object-cover" alt="">
                     </div>
                   <% end %>
-                  <% if note.images.count > 4 %>
+                  <% if note.images_urls.count > 4 %>
                     <div class="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center">
-                      <span class="text-gray-500 text-sm">+<%= note.images.count - 4 %></span>
+                      <span class="text-gray-500 text-sm">+<%= note.images_urls.count - 4 %></span>
                     </div>
                   <% end %>
                 </div>

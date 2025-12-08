@@ -333,10 +333,10 @@
                           <img src="<%= url %>" class="w-full h-full object-cover" alt="">
                         </div>
                       <% end %>
-                      <% if note.images_count > 3 %>
+                      <% if note.images_urls.count > 3 %>
                         <div class="w-16 h-16 rounded bg-gray-200 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
                              onclick="openNoteImageModal(<%= note.id %>, 3)">
-                          <span class="text-gray-500 text-xs">+<%= note.images_count - 3 %></span>
+                          <span class="text-gray-500 text-xs">+<%= note.images_urls.count - 3 %></span>
                         </div>
                       <% end %>
                     </div>
@@ -435,37 +435,35 @@
   </div>
 <% end %>
 
-<!-- Image Modal -->
-<% if @bakery.images? %>
-  <div id="imageModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50" onclick="closeImageModal()">
-    <div class="max-w-4xl max-h-full p-4">
-      <button onclick="closeImageModal()" class="absolute top-2 right-2 text-white hover:text-gray-300">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
-      <img id="modalImage" src="" alt="가게 사진" class="max-w-full max-h-full object-contain rounded-lg">
-      
-      <!-- Navigation buttons (only show if more than 1 image) -->
-      <% if @bakery.images_count > 1 %>
-        <button id="prevBtn" onclick="changeImage(-1); event.stopPropagation();" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 bg-black/30 rounded-full p-2">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
-        </button>
-        <button id="nextBtn" onclick="changeImage(1); event.stopPropagation();" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 bg-black/30 rounded-full p-2">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-          </svg>
-        </button>
-      <% end %>
-      
-      <!-- Image counter -->
-      <div id="imageCounter" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm"></div>
-    </div>
-  </div>
+<!-- Image Modal (always rendered for both bakery and note images) -->
+<div id="imageModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50" onclick="closeImageModal()">
+  <div class="max-w-4xl max-h-full p-4">
+    <button onclick="closeImageModal()" class="absolute top-2 right-2 text-white hover:text-gray-300">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+    <img id="modalImage" src="" alt="사진" class="max-w-full max-h-full object-contain rounded-lg">
 
-  <script type="module">
+    <!-- Navigation buttons (controlled by JavaScript based on image count) -->
+    <button id="prevBtn" onclick="changeImage(-1); event.stopPropagation();" class="hidden absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 bg-black/30 rounded-full p-2">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+    <button id="nextBtn" onclick="changeImage(1); event.stopPropagation();" class="hidden absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 bg-black/30 rounded-full p-2">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
+
+    <!-- Image counter -->
+    <div id="imageCounter" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm"></div>
+  </div>
+</div>
+
+<% if @bakery.images? %>
+  <script>
     // Initialize bakery images data
     window.bakeryImages = <%= @bakery.images_urls.to_json.html_safe %>;
   </script>
@@ -480,6 +478,7 @@
   <% end %>
 
   // Initialize all modules
+  initializeTabs();
   initializeImageModal();
   initializeNoteImageModal();
   <% if current_user&.admin? %>

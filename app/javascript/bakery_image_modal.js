@@ -31,6 +31,7 @@ export function initializeImageModal() {
     if (modal) {
       modal.classList.remove('hidden');
       updateModalImage();
+      updateNavigationButtons();
     }
   };
 
@@ -56,6 +57,19 @@ export function initializeImageModal() {
 
     if (imageCounter) {
       imageCounter.textContent = `${window.currentImageIndex + 1} / ${window.bakeryImages.length}`;
+    }
+  }
+
+  function updateNavigationButtons() {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    if (window.bakeryImages.length > 1) {
+      if (prevBtn) prevBtn.classList.remove('hidden');
+      if (nextBtn) nextBtn.classList.remove('hidden');
+    } else {
+      if (prevBtn) prevBtn.classList.add('hidden');
+      if (nextBtn) nextBtn.classList.add('hidden');
     }
   }
 
@@ -87,12 +101,23 @@ export function initializeNoteImageModal() {
       modal.classList.remove('hidden');
       const modalImage = document.getElementById('modalImage');
       const imageCounter = document.getElementById('imageCounter');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
 
       if (modalImage) {
         modalImage.src = noteImages[imageIndex];
       }
       if (imageCounter) {
         imageCounter.textContent = `${imageIndex + 1} / ${noteImages.length}`;
+      }
+
+      // Show/hide navigation buttons based on image count
+      if (noteImages.length > 1) {
+        if (prevBtn) prevBtn.classList.remove('hidden');
+        if (nextBtn) nextBtn.classList.remove('hidden');
+      } else {
+        if (prevBtn) prevBtn.classList.add('hidden');
+        if (nextBtn) nextBtn.classList.add('hidden');
       }
     }
   };
