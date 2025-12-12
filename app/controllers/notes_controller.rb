@@ -1,7 +1,6 @@
 class NotesController < ApplicationController
   before_action :set_bakery
   before_action :set_note, only: [ :show, :edit, :update, :destroy, :toggle_public ]
-  before_action :ensure_favorite, only: [ :new, :create ]
 
   def index
     @notes = Current.user.notes.where(bakery: @bakery).recent
@@ -87,12 +86,6 @@ class NotesController < ApplicationController
 
   def set_note
     @note = Current.user.notes.find(params[:id])
-  end
-
-  def ensure_favorite
-    unless Current.user.favorites.exists?(bakery: @bakery)
-      redirect_to @bakery, alert: "즐겨찾기한 가게만 노트를 작성할 수 있습니다."
-    end
   end
 
   def upload_cloudflare_images

@@ -1,8 +1,8 @@
 class Admin::BakeriesController < Admin::AdminController
-  before_action :set_bakery, only: [:edit, :update, :destroy]
+  before_action :set_bakery, only: [ :edit, :update, :destroy ]
 
   def index
-    @bakeries = Bakery.order(created_at: :desc)
+    @bakeries = Bakery.order(created_at: :desc, id: :desc)
   end
 
   def edit
@@ -48,12 +48,12 @@ class Admin::BakeriesController < Admin::AdminController
 
   def process_operating_hours
     return {} unless params[:operating_hours].present?
-    
+
     hours_data = {}
     %w[monday tuesday wednesday thursday friday saturday sunday].each do |day|
       day_params = params[:operating_hours][day]
       next unless day_params
-      
+
       hours_data[day] = {
         "closed" => day_params[:closed] == "1",
         "open_time" => day_params[:open_time],
