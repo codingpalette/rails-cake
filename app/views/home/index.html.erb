@@ -1,8 +1,39 @@
-<div class="max-w-7xl mx-auto px-4 py-8"
-     data-controller="infinite-scroll"
-     data-infinite-scroll-url-value="<%= root_path %>"
-     data-infinite-scroll-page-value="1"
-     data-infinite-scroll-has-more-value="<%= @pagy.next.present? %>">
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <%# 검색 창 %>
+  <div class="mb-8" data-controller="search" data-search-url-value="<%= root_path %>">
+    <div class="relative max-w-xl mx-auto">
+      <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
+      <input type="text"
+             data-search-target="input"
+             data-action="input->search#search"
+             value="<%= params[:query] %>"
+             placeholder="가게 이름으로 검색..."
+             class="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-1 focus:ring-orange-500 focus:border-orange-500 text-gray-900 placeholder-gray-400 outline-none">
+      <% if params[:query].present? %>
+        <button type="button"
+                data-action="click->search#clear"
+                class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      <% end %>
+    </div>
+    <% if params[:query].present? %>
+      <p class="text-center text-gray-600 mt-3">
+        "<span class="font-medium text-gray-900"><%= params[:query] %></span>" 검색 결과: <span class="font-medium"><%= @pagy.count %>개</span>
+      </p>
+    <% end %>
+  </div>
+
+  <div data-controller="infinite-scroll"
+       data-infinite-scroll-url-value="<%= root_path(query: params[:query]) %>"
+       data-infinite-scroll-page-value="1"
+       data-infinite-scroll-has-more-value="<%= @pagy.next.present? %>">
 
   <% if @bakeries.any? %>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
@@ -28,13 +59,23 @@
   <% else %>
     <div class="text-center py-16">
       <svg class="w-24 h-24 mx-auto text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h3M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+        <% if params[:query].present? %>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        <% else %>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h3M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+        <% end %>
       </svg>
-      <h3 class="text-xl font-semibold text-gray-700 mb-2">아직 등록된 가게가 없습니다</h3>
-      <p class="text-gray-500 mb-6">첫 번째 가게를 등록해보세요!</p>
-      <% if current_user&.admin? %>
-        <%= link_to "가게 등록하기", new_bakery_path, class: "inline-flex items-center px-6 py-3 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 transition-colors" %>
+      <% if params[:query].present? %>
+        <h3 class="text-xl font-semibold text-gray-700 mb-2">검색 결과가 없습니다</h3>
+        <p class="text-gray-500 mb-6">다른 검색어로 시도해보세요</p>
+      <% else %>
+        <h3 class="text-xl font-semibold text-gray-700 mb-2">아직 등록된 가게가 없습니다</h3>
+        <p class="text-gray-500 mb-6">첫 번째 가게를 등록해보세요!</p>
+        <% if current_user&.admin? %>
+          <%= link_to "가게 등록하기", new_bakery_path, class: "inline-flex items-center px-6 py-3 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 transition-colors" %>
+        <% end %>
       <% end %>
     </div>
   <% end %>
+  </div>
 </div>
