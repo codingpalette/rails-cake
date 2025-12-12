@@ -1,0 +1,11 @@
+<turbo-frame id="bakeries-page">
+  <div id="bakeries-content">
+    <% bakeries.each do |bakery| %>
+      <%= render "bakery_card", bakery: bakery %>
+    <% end %>
+  </div>
+
+  <% if pagy.next %>
+    <span data-next-page hidden></span>
+  <% end %>
+</turbo-frame>

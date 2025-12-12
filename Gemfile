@@ -71,3 +71,6 @@ gem "httparty"
 
 # Load environment variables from .env
 gem "dotenv-rails", groups: [:development, :test]
+
+# Fast pagination
+gem "pagy"

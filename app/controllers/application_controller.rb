@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   include Authentication
+  include Pagy::Method
   helper TimeSelectHelper
   # Allow all browsers including mobile browsers
   # If you want to restrict specific old browsers, use:

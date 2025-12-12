@@ -1,21 +1,28 @@
-<div class="max-w-7xl mx-auto px-4 py-8">
-  <!--
-  <header class="text-center mb-12">
-    <h1 class="text-4xl font-bold text-gray-900 mb-4">서울 맛집 케이크 가게</h1>
-    <p class="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed mb-6">
-      달콤한 케이크와 디저트를 만날 수 있는 서울의 인기 베이커리와 카페들을 소개합니다
-    </p>
-    
-    <div class="inline-flex items-center px-4 py-2 bg-gray-100 rounded-full">
-      <span class="text-gray-700 font-medium"><%= @bakeries.count %>개의 가게</span>
-    </div>
-  </header>
-  -->
-  
+<div class="max-w-7xl mx-auto px-4 py-8"
+     data-controller="infinite-scroll"
+     data-infinite-scroll-url-value="<%= root_path %>"
+     data-infinite-scroll-page-value="1"
+     data-infinite-scroll-has-more-value="<%= @pagy.next.present? %>">
+
   <% if @bakeries.any? %>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+         data-infinite-scroll-target="container">
       <% @bakeries.each do |bakery| %>
         <%= render "bakery_card", bakery: bakery %>
+      <% end %>
+    </div>
+
+    <%# 무한 스크롤 감지용 sentinel %>
+    <div data-infinite-scroll-target="sentinel" class="flex justify-center py-8">
+      <% if @pagy.next %>
+        <div class="flex items-center gap-2 text-gray-500">
+          <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>불러오는 중...</span>
+        </div>
+        <span data-next-page hidden></span>
       <% end %>
     </div>
   <% else %>
