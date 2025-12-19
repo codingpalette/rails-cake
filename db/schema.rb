@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_08_050207) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_12_063113) do
   create_table "bakeries", force: :cascade do |t|
     t.string "name"
     t.string "category"
@@ -80,7 +80,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_08_050207) do
     t.datetime "updated_at", null: false
     t.boolean "admin", default: false, null: false
     t.string "cloudflare_profile_image_id"
+    t.string "nickname"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+    t.index ["nickname"], name: "index_users_on_nickname", unique: true
   end
 
   add_foreign_key "bakeries", "bakeries", column: "parent_id"

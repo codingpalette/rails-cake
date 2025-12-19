@@ -1,0 +1,36 @@
+ko:
+  activerecord:
+    errors:
+      models:
+        user:
+          attributes:
+            password:
+              blank: "를 입력해주세요"
+              too_short: "는 최소 %{count}자 이상이어야 합니다"
+            password_confirmation:
+              confirmation: "가 비밀번호와 일치하지 않습니다"
+            email_address:
+              blank: "를 입력해주세요"
+              taken: "는 이미 사용 중입니다"
+              invalid: "형식이 올바르지 않습니다"
+            nickname:
+              taken: "은 이미 사용 중입니다"
+      messages:
+        confirmation: "가 일치하지 않습니다"
+        blank: "를 입력해주세요"
+        taken: "는 이미 사용 중입니다"
+        too_short: "는 최소 %{count}자 이상이어야 합니다"
+        invalid: "가 올바르지 않습니다"
+    attributes:
+      user:
+        email_address: "이메일"
+        password: "비밀번호"
+        password_confirmation: "비밀번호 확인"
+        nickname: "닉네임"
+  errors:
+    format: "%{attribute} %{message}"
+    messages:
+      confirmation: "가 일치하지 않습니다"
+      blank: "를 입력해주세요"
+      taken: "는 이미 사용 중입니다"
+      too_short: "는 최소 %{count}자 이상이어야 합니다"
